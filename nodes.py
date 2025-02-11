@@ -28,6 +28,74 @@ MODEL_VERSIONS = {
     'BiRefNet-legacy': ('BiRefNet-legacy', (1024, 1024))  
 }  
 
+def refine_foreground(image, mask, r=90):
+    if mask.size != image.size:
+        mask = mask.resize(image.size)
+    image = np.array(image) / 255.0
+    mask = np.array(mask) / 255.0
+    estimated_foreground = FB_blur_fusion_foreground_estimator_2(image, mask, r=r)
+    new_foreground = Image.fromarray((estimated_foreground * 255.0).astype(np.uint8))
+    return new_foreground
+
+
+def refine_foreground2(image, mask):
+    if mask.size != image.size:
+        mask = mask.resize(image.size)
+    image = np.array(image) / 255.0
+    mask = np.array(mask) / 255.0
+    estimated_foreground = FB_blur_fusion_foreground_estimator_2_Adaptive(image, mask)
+    new_foreground = Image.fromarray((estimated_foreground * 255.0).astype(np.uint8))
+    return new_foreground
+
+
+def FB_blur_fusion_foreground_estimator_2(image, alpha, r=90):
+    # Thanks to the source: https://github.com/Photoroom/fast-foreground-estimation
+    alpha = alpha[:, :, None]
+    F, blur_B = FB_blur_fusion_foreground_estimator(image, image, image, alpha, r)
+    return FB_blur_fusion_foreground_estimator(image, F, blur_B, alpha, r=6)[0]
+
+
+def FB_blur_fusion_foreground_estimator(image, F, B, alpha, r=90):
+    if isinstance(image, Image.Image):
+        image = np.array(image) / 255.0
+    blurred_alpha = cv2.blur(alpha, (r, r))[:, :, None]
+
+    blurred_FA = cv2.blur(F * alpha, (r, r))
+    blurred_F = blurred_FA / (blurred_alpha + 1e-5)
+
+    blurred_B1A = cv2.blur(B * (1 - alpha), (r, r))
+    blurred_B = blurred_B1A / ((1 - blurred_alpha) + 1e-5)
+    F = blurred_F + alpha * \
+        (image - alpha * blurred_F - (1 - alpha) * blurred_B)
+    F = np.clip(F, 0, 1)
+    return F, blurred_B
+
+def FB_blur_fusion_foreground_estimator_2_Adaptive(image, alpha, r=6):
+    if isinstance(image, Image.Image):
+        image = np.array(image) / 255.0
+    (H,W) = image.shape[:2]
+    r1 = int(W*0.1)
+    alpha = alpha[:, :, None]
+    F, blur_B = FB_blur_fusion_foreground_estimator(
+        image, image, image, alpha, r1)
+    r2 = int(W*0.007)
+    F,blur_B = FB_blur_fusion_foreground_estimator_Adaptive(image, F, blur_B, alpha, r2)
+    return F
+
+def FB_blur_fusion_foreground_estimator_Adaptive(image, F, B, alpha, r=90):
+    if isinstance(image, Image.Image):
+        image = np.array(image) / 255.0
+    blurred_alpha = cv2.blur(alpha, (r, r))[:, :, None]
+
+    blurred_FA = cv2.blur(F * alpha, (r, r))
+    blurred_F = blurred_FA / (blurred_alpha + 1e-5)
+
+    blurred_B1A = cv2.blur(B * (1 - alpha), (r, r))
+    blurred_B = blurred_B1A / ((1 - blurred_alpha) + 1e-5)
+    F = blurred_F + alpha * \
+        (image - alpha * blurred_F - (1 - alpha) * blurred_B)
+    F = np.clip(F, 0, 1)
+    return F, blurred_B
 def get_device_by_name(device):  
     """  
     根据名称获取设备  
@@ -130,9 +198,10 @@ class BiRefNet_Remove_Background:
     def INPUT_TYPES(cls):  
         return {  
             "required": {  
-                "image": ("IMAGE",),  
                 "model": ("BIREFNET_MODEL",),  
-                "background_color": (["transparency"] + ["white", "black", "green", "blue", "red"], {"default": "transparency"}),  
+                "image": ("IMAGE",),  
+                "background_color": (["transparency"] + ["white", "black", "green", "blue", "red"], {"default": "transparency"}),
+                "use_refine": ("BOOLEAN", {"default": True})  
             }  
         }  
 
@@ -141,7 +210,7 @@ class BiRefNet_Remove_Background:
     FUNCTION = "inference"  
     CATEGORY = "BiRefNet🌟"  
 
-    def inference(self, image, model, background_color):  
+    def inference(self, image, model, background_color, use_refine):  
         model_data = model  
         model = model_data["model"]  
         device = model_data["device"]  
@@ -165,23 +234,28 @@ class BiRefNet_Remove_Background:
 
             # 推理  
             with torch.no_grad():  
-                pred = model(image_tensor)[-1].sigmoid().cpu()  
+                preds = model(image_tensor)[-1].sigmoid().cpu()  
+
+            pred = preds[0].squeeze()
+            pred_pil = transforms.ToPILImage()(pred)
+            mask = pred_pil.resize((w, h))
             
-            # 后处理  
-            pred = torch.squeeze(F.interpolate(pred, size=(h, w)))  
-            pred = (pred - pred.min()) / (pred.max() - pred.min())  
-            mask = Image.fromarray((pred * 255).numpy().astype(np.uint8))  
-            
-            # 设置背景  
+
+            # 选择应用前景优化  
+            if use_refine:  
+                refined_image = refine_foreground(orig_image, pred_pil, r=90)  # 使用固定的r值即可（实验验证过调整r值对结果影响很小） 
+
+            # 设置背景和前景  
+
             if background_color == "transparency":  
                 result_image = Image.new("RGBA", (w, h), (0, 0, 0, 0))  
+                result_image.paste(refined_image if use_refine else orig_image, mask=mask)
             else:  
                 result_image = Image.new("RGB", (w, h), background_color)  
-            
-            result_image.paste(orig_image, mask=mask)  
+                result_image.paste(refined_image if use_refine else orig_image, mask=mask)
             
             # 转换回tensor  
-            processed_images.append(torch.from_numpy(np.array(result_image).astype(np.float32) / 255.0).unsqueeze(0))  
+            processed_images.append(torch.from_numpy(np.array(result_image).astype(np.float32) / 255.0).unsqueeze(0)) 
             processed_masks.append(torch.from_numpy(np.array(mask).astype(np.float32) / 255.0).unsqueeze(0))  
 
         return torch.cat(processed_images, dim=0), torch.cat(processed_masks, dim=0)  
