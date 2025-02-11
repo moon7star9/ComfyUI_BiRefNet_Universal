@@ -1,72 +1,16 @@
 {
-  "last_node_id": 187,
-  "last_link_id": 314,
+  "last_node_id": 208,
+  "last_link_id": 361,
   "nodes": [
-    {
-      "id": 185,
-      "type": "PreviewImage",
-      "pos": [
-        1729.7855224609375,
-        1737.8848876953125
-      ],
-      "size": [
-        210,
-        246
-      ],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 311,
-          "label": "images"
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "PreviewImage"
-      },
-      "widgets_values": []
-    },
-    {
-      "id": 186,
-      "type": "PreviewMask_",
-      "pos": [
-        1958.6656494140625,
-        1740.193359375
-      ],
-      "size": [
-        264.5999755859375,
-        246
-      ],
-      "flags": {},
-      "order": 4,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "mask",
-          "type": "MASK",
-          "link": 312,
-          "label": "mask"
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "PreviewMask_"
-      },
-      "widgets_values": []
-    },
     {
       "id": 176,
       "type": "LoadImage",
       "pos": [
-        842.9797973632812,
-        1675.85546875
+        977.9140625,
+        1663.5936279296875
       ],
       "size": [
-        315,
+        240.35882568359375,
         314
       ],
       "flags": {},
@@ -78,7 +22,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            310
+            348
           ],
           "slot_index": 0,
           "label": "IMAGE"
@@ -94,7 +38,7 @@
         "Node name for S&R": "LoadImage"
       },
       "widgets_values": [
-        "240059928-8863e16ad4706cb3121dd7cf41144303c61c8cbbd915036b38c4a4b5a5fb6e19.png",
+        "7fd4db69b988a95889d84db77ee9af88.jpeg",
         "image"
       ]
     },
@@ -102,8 +46,8 @@
       "id": 187,
       "type": "BiRefNet_Loader",
       "pos": [
-        1293.8662109375,
-        1652.4893798828125
+        1267.5089111328125,
+        1717.0570068359375
       ],
       "size": [
         315,
@@ -118,7 +62,7 @@
           "name": "model",
           "type": "BIREFNET_MODEL",
           "links": [
-            313
+            350
           ],
           "slot_index": 0,
           "label": "model"
@@ -133,11 +77,11 @@
       ]
     },
     {
-      "id": 184,
+      "id": 205,
       "type": "BiRefNet_Remove_Background",
       "pos": [
-        1268.6446533203125,
-        1853.5186767578125
+        1249.5377197265625,
+        1866.2694091796875
       ],
       "size": [
         352.79998779296875,
@@ -148,16 +92,16 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "image",
-          "type": "IMAGE",
-          "link": 310,
-          "label": "image"
-        },
-        {
           "name": "model",
           "type": "BIREFNET_MODEL",
-          "link": 313,
+          "link": 350,
           "label": "model"
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 348,
+          "label": "image"
         }
       ],
       "outputs": [
@@ -165,7 +109,7 @@
           "name": "image",
           "type": "IMAGE",
           "links": [
-            311
+            360
           ],
           "slot_index": 0,
           "label": "image"
@@ -174,7 +118,7 @@
           "name": "mask",
           "type": "MASK",
           "links": [
-            312
+            361
           ],
           "slot_index": 1,
           "label": "mask"
@@ -184,52 +128,107 @@
         "Node name for S&R": "BiRefNet_Remove_Background"
       },
       "widgets_values": [
-        "transparency"
+        "transparency",
+        true
       ]
+    },
+    {
+      "id": 207,
+      "type": "PreviewImage",
+      "pos": [
+        1670.326904296875,
+        1709.2568359375
+      ],
+      "size": [
+        280.2456359863281,
+        257.28948974609375
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 360,
+          "label": "images"
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 208,
+      "type": "PreviewMask_",
+      "pos": [
+        1958.4937744140625,
+        1713.248291015625
+      ],
+      "size": [
+        268.3631286621094,
+        257.28948974609375
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 361,
+          "label": "mask"
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewMask_"
+      }
     }
   ],
   "links": [
     [
-      310,
+      348,
       176,
       0,
-      184,
-      0,
-      "IMAGE"
-    ],
-    [
-      311,
-      184,
-      0,
-      185,
-      0,
-      "IMAGE"
-    ],
-    [
-      312,
-      184,
+      205,
       1,
-      186,
-      0,
-      "MASK"
+      "IMAGE"
     ],
     [
-      313,
+      350,
       187,
       0,
-      184,
-      1,
+      205,
+      0,
       "BIREFNET_MODEL"
+    ],
+    [
+      360,
+      205,
+      0,
+      207,
+      0,
+      "IMAGE"
+    ],
+    [
+      361,
+      205,
+      1,
+      208,
+      0,
+      "MASK"
     ]
   ],
   "groups": [],
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.6588450000000027,
+      "scale": 0.7972024500000005,
       "offset": [
-        -577.0054185385463,
-        -1246.791758771145
+        -461.23542090406414,
+        -1415.2402586017017
       ]
     },
     "groupNodes": {},
