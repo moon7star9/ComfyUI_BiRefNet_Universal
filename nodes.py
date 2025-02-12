@@ -37,17 +37,6 @@ def refine_foreground(image, mask, r=90):
     new_foreground = Image.fromarray((estimated_foreground * 255.0).astype(np.uint8))
     return new_foreground
 
-
-def refine_foreground2(image, mask):
-    if mask.size != image.size:
-        mask = mask.resize(image.size)
-    image = np.array(image) / 255.0
-    mask = np.array(mask) / 255.0
-    estimated_foreground = FB_blur_fusion_foreground_estimator_2_Adaptive(image, mask)
-    new_foreground = Image.fromarray((estimated_foreground * 255.0).astype(np.uint8))
-    return new_foreground
-
-
 def FB_blur_fusion_foreground_estimator_2(image, alpha, r=90):
     # Thanks to the source: https://github.com/Photoroom/fast-foreground-estimation
     alpha = alpha[:, :, None]
@@ -70,32 +59,6 @@ def FB_blur_fusion_foreground_estimator(image, F, B, alpha, r=90):
     F = np.clip(F, 0, 1)
     return F, blurred_B
 
-def FB_blur_fusion_foreground_estimator_2_Adaptive(image, alpha, r=6):
-    if isinstance(image, Image.Image):
-        image = np.array(image) / 255.0
-    (H,W) = image.shape[:2]
-    r1 = int(W*0.1)
-    alpha = alpha[:, :, None]
-    F, blur_B = FB_blur_fusion_foreground_estimator(
-        image, image, image, alpha, r1)
-    r2 = int(W*0.007)
-    F,blur_B = FB_blur_fusion_foreground_estimator_Adaptive(image, F, blur_B, alpha, r2)
-    return F
-
-def FB_blur_fusion_foreground_estimator_Adaptive(image, F, B, alpha, r=90):
-    if isinstance(image, Image.Image):
-        image = np.array(image) / 255.0
-    blurred_alpha = cv2.blur(alpha, (r, r))[:, :, None]
-
-    blurred_FA = cv2.blur(F * alpha, (r, r))
-    blurred_F = blurred_FA / (blurred_alpha + 1e-5)
-
-    blurred_B1A = cv2.blur(B * (1 - alpha), (r, r))
-    blurred_B = blurred_B1A / ((1 - blurred_alpha) + 1e-5)
-    F = blurred_F + alpha * \
-        (image - alpha * blurred_F - (1 - alpha) * blurred_B)
-    F = np.clip(F, 0, 1)
-    return F, blurred_B
 def get_device_by_name(device):  
     """  
     根据名称获取设备  
