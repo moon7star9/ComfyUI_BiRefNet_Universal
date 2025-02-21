@@ -6,11 +6,11 @@ from PIL import Image
 import torch.nn.functional as F  
 import os  
 import cv2  
+import folder_paths
 
 torch.set_float32_matmul_precision(["high", "highest"][0])  
 
-current_path = os.getcwd()  
-models_path = os.path.join(current_path, "models", "BiRefNet")  
+models_path = os.path.join(folder_paths.models_dir, "BiRefNet")
 
 # 模型配置  
 MODEL_VERSIONS = {  
