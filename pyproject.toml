@@ -1,7 +1,7 @@
 [project]
 name = "birefnet_universal"
 description = "A comprehensive node package that seamlessly integrates all BiRefNet series models into ComfyUI"
-version = "1.0.0"
+version = "1.0.1"
 license = {file = "LICENSE"}
 dependencies = ["transformers<=4.48.0", "torch>=2.5.0", "torchvision>=0.20.0", "numpy<2", "opencv-python", "timm", "scipy", "scikit-image", "kornia", "einops", "tqdm", "prettytable", "huggingface-hub>0.25", "accelerate"]
 
