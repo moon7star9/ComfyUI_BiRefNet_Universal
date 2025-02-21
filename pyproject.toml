@@ -10,6 +10,6 @@ Repository = "https://github.com/moon7star9/ComfyUI_BiRefNet_Universal"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = ""
+PublisherId = "moon7star9"
 DisplayName = "ComfyUI_BiRefNet_Universal"
 Icon = ""
