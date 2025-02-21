@@ -57,7 +57,14 @@
 
   ![cup-matting](https://github.com/user-attachments/assets/577cb864-247d-49ee-824d-e31366b4ad5f)
 
+- BiRefNet_HR-matting
+  镂空、透明、发丝类数据专项训练，2048*2048推理，更适合高清图的matting
 
+  - 玻璃杯抠图结果
+ 
+  ![cup-HR-matting](https://github.com/user-attachments/assets/a9bd2283-cea7-4343-94d5-bca867d56744)
+
+  
 - BiRefNet_lite
   轻量级模型，1024*1024推理
 
