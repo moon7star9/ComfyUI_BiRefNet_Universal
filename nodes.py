@@ -100,7 +100,7 @@ class BiRefNet_Loader:
     def INPUT_TYPES(cls):  
         return {  
             "required": {  
-                "model_version": (list(MODEL_VERSIONS.keys()), {"default": "General-HR"}),  
+                "model_version": (list(MODEL_VERSIONS.keys()), {"default": "BiRefNet_HR"}),  
                 "device": (["auto", "cuda", "cpu", "mps", "xpu", "meta"], {"default": "auto"})  
             }  
         }  
